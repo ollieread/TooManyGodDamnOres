@@ -23,11 +23,9 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 
-@Mod(modid = TMGDO.MODID, name = TMGDO.MODID, version = TMGDO.VERSION)
+@Mod(modid = "TooManyGodDamnOres", name = "TooManyGodDamnOres", version = "${version}")
 public class TMGDO {
 
-	public static final String MODID = "TooManyGodDamnOres";
-	public static final String VERSION = "1.0-alpha";
 	public static ConfigCategory replacements;
 	public static ConfigCategory exclusions;
 	
