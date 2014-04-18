@@ -1,0 +1,16 @@
+[
+{
+  "modid": "TooManyGodDamnOres",
+  "name": "TooManyGodDamnOres",
+  "description": "Enforce the ore dictionary by making ore types drop a single unified block.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authors": ["ollieread"],
+  "credits": "All the guys in #minecraftforge for helping me with this",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
