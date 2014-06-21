@@ -54,31 +54,38 @@ public class TMGDO {
 		if(replacements != null) {
 			ItemStack oreStack = new ItemStack(event.block, 1, event.blockMetadata);
 			int oreID = OreDictionary.getOreID(oreStack);
-			String oreName = OreDictionary.getOreName(oreID);
 			
-			if(replacements.containsKey(oreName)) {
-				String replacementName = replacements.get(oreName).getString();
-				List<String> exclusionNames = Arrays.asList(exclusions.get(oreName).getStringList());
-				UniqueIdentifier ore = GameRegistry.findUniqueIdentifierFor(oreStack.getItem());
+			if(oreID > -1) {
+				String oreName = OreDictionary.getOreName(oreID);
 				
-				if(exclusionNames.contains(ore.modId + ":" + ore.name)) {
-					return;
-				}
-				
-				ItemStack replacementStack = null;
-				
-				for(ItemStack i : OreDictionary.getOres(oreID)) {
-					UniqueIdentifier item = GameRegistry.findUniqueIdentifierFor(i.getItem());
-					if(!exclusionNames.contains(item.modId + ":" + item.name) && item.modId.contains(replacementName)) {
-						replacementStack = i.copy();
-						break;
+				if(oreName != null && replacements.containsKey(oreName)) {
+					String replacementName = replacements.get(oreName).getString();
+					List<String> exclusionNames = Arrays.asList(exclusions.get(oreName).getStringList());
+					UniqueIdentifier ore = GameRegistry.findUniqueIdentifierFor(oreStack.getItem());
+					
+					if(ore == null) {
+						return;
 					}
-				}
-				
-				if(replacementStack != null) {	
-					for(int i = 0; i < event.drops.size(); i++) {						
-						if(event.drops.get(i).isItemEqual(oreStack)) {
-							event.drops.set(i, replacementStack);
+					
+					if(exclusionNames.contains(ore.modId + ":" + ore.name)) {
+						return;
+					}
+					
+					ItemStack replacementStack = null;
+					
+					for(ItemStack i : OreDictionary.getOres(oreID)) {
+						UniqueIdentifier item = GameRegistry.findUniqueIdentifierFor(i.getItem());
+						if(item != null && !exclusionNames.contains(item.modId + ":" + item.name) && item.modId.contains(replacementName)) {
+							replacementStack = i.copy();
+							break;
+						}
+					}
+					
+					if(replacementStack != null) {	
+						for(int i = 0; i < event.drops.size(); i++) {						
+							if(event.drops.get(i) != null && event.drops.get(i).isItemEqual(oreStack)) {
+								event.drops.set(i, replacementStack);
+							}
 						}
 					}
 				}
