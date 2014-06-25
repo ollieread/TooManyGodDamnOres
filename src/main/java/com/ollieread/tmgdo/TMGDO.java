@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockOre;
 import net.minecraft.item.ItemStack;
@@ -25,6 +28,8 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 
 @Mod(modid = "TooManyGodDamnOres", name = "TooManyGodDamnOres", version = "${version}")
 public class TMGDO {
+
+    public static final Logger logger = LogManager.getLogger("TooManyGodDamnOres");
 
 	public static ConfigCategory replacements;
 	public static ConfigCategory exclusions;
@@ -52,42 +57,55 @@ public class TMGDO {
 	public void harvestBlock(HarvestDropsEvent event)
 	{
 		if(replacements != null) {
-			ItemStack oreStack = new ItemStack(event.block, 1, event.blockMetadata);
-			int oreID = OreDictionary.getOreID(oreStack);
-			
-			if(oreID > -1) {
-				String oreName = OreDictionary.getOreName(oreID);
-				
-				if(oreName != null && replacements.containsKey(oreName)) {
-					String replacementName = replacements.get(oreName).getString();
-					List<String> exclusionNames = Arrays.asList(exclusions.get(oreName).getStringList());
-					UniqueIdentifier ore = GameRegistry.findUniqueIdentifierFor(oreStack.getItem());
+			if(event.block != null) {
+				ItemStack oreStack = new ItemStack(event.block, 1, event.blockMetadata);
+				if(oreStack.getItem() != null) {
+					int[] oreIDs = OreDictionary.getOreIDs(oreStack);
+					int oreID;
 					
-					if(ore == null) {
-						return;
-					}
-					
-					if(exclusionNames.contains(ore.modId + ":" + ore.name)) {
-						return;
-					}
-					
-					ItemStack replacementStack = null;
-					
-					for(ItemStack i : OreDictionary.getOres(oreID)) {
-						UniqueIdentifier item = GameRegistry.findUniqueIdentifierFor(i.getItem());
-						if(item != null && !exclusionNames.contains(item.modId + ":" + item.name) && item.modId.contains(replacementName)) {
-							replacementStack = i.copy();
-							break;
-						}
-					}
-					
-					if(replacementStack != null) {	
-						for(int i = 0; i < event.drops.size(); i++) {						
-							if(event.drops.get(i) != null && event.drops.get(i).isItemEqual(oreStack)) {
-								event.drops.set(i, replacementStack);
+					if(oreIDs.length > 0) {
+						for(int i = 0; i < oreIDs.length; i++) {
+							oreID = oreIDs[i];
+							
+							if(oreID > -1) {
+								String oreName = OreDictionary.getOreName(oreID);
+								
+								if(oreName != null && replacements.containsKey(oreName)) {
+									String replacementName = replacements.get(oreName).getString();
+									List<String> exclusionNames = Arrays.asList(exclusions.get(oreName).getStringList());
+									UniqueIdentifier ore = GameRegistry.findUniqueIdentifierFor(oreStack.getItem());
+									
+									if(ore == null) {
+										return;
+									}
+									
+									if(exclusionNames.contains(ore.modId + ":" + ore.name)) {
+										return;
+									}
+									
+									ItemStack replacementStack = null;
+									
+									for(ItemStack i1 : OreDictionary.getOres(oreID)) {
+										UniqueIdentifier item = GameRegistry.findUniqueIdentifierFor(i1.getItem());
+										if(item != null && !exclusionNames.contains(item.modId + ":" + item.name) && item.modId.contains(replacementName)) {
+											replacementStack = i1.copy();
+											break;
+										}
+									}
+									
+									if(replacementStack != null) {	
+										for(int i1 = 0; i1 < event.drops.size(); i1++) {						
+											if(event.drops.get(i1) != null && event.drops.get(i1).isItemEqual(oreStack)) {
+												event.drops.set(i1, replacementStack);
+											}
+										}
+									}
+								}
 							}
 						}
 					}
+				} else {
+					logger.warn("A HarvestDropsEvent was fired with no subject block");
 				}
 			}
 		}
