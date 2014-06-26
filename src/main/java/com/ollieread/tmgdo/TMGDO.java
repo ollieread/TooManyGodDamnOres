@@ -15,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
 import net.minecraftforge.oredict.OreDictionary;
 import cpw.mods.fml.common.Mod;
@@ -72,7 +73,15 @@ public class TMGDO {
 								
 								if(oreName != null && replacements.containsKey(oreName)) {
 									String replacementName = replacements.get(oreName).getString();
-									List<String> exclusionNames = Arrays.asList(exclusions.get(oreName).getStringList());
+									Property exclusionDirty = exclusions.get(oreName);
+									List<String> exclusionNames = null;
+									
+									if(exclusionDirty != null) {
+										exclusionNames = Arrays.asList(exclusionDirty.getStringList());
+									} else {
+										exclusionNames = new ArrayList<String>();
+									}
+									
 									UniqueIdentifier ore = GameRegistry.findUniqueIdentifierFor(oreStack.getItem());
 									
 									if(ore == null) {
