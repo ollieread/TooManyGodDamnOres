@@ -17,6 +17,15 @@ buildscript {
 
 apply plugin: 'forge'
 
+ext.configFile = file "build.properties"
+
+configFile.withReader {
+    // Load config.  It shall from now be referenced as simply config or project.config
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
+}
+
 version = "${config.version.minecraft}-${config.version.forge}_${config.version.major}.${config.version.minor}.${config.version.revis}"
 group= "com.ollieread.tmgdo"
 archivesBaseName = "TooManyGodDamnOres"
@@ -43,5 +52,7 @@ processResources
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
+        
+        expand 'version':project.version, 'mcversion':project.minecraft.version
     }
 }
