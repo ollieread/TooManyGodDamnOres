@@ -56,3 +56,5 @@ processResources
         expand 'version':project.version, 'mcversion':project.minecraft.version
     }
 }
+
+version += "-${System.getenv("BUILD_NUMBER") ?: 0}"
