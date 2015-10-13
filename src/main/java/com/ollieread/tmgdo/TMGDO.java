@@ -34,6 +34,8 @@ public class TMGDO {
 
 	public static ConfigCategory replacements;
 	public static ConfigCategory exclusions;
+	public static ConfigCategory general;
+	public static boolean warnNoSubjectBlock;
 	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
@@ -44,6 +46,8 @@ public class TMGDO {
 		
 		replacements = config.getCategory("replacements");
 		exclusions = config.getCategory("exclusions");
+		general = config.getCategory("general");
+		warnNoSubjectBlock = config.getBoolean("warnNoSubjectBlock", "general", true, "Whether to warn when a HarvestDropsEvent is fired without a subject block");
 		
 		config.save();
 	}
@@ -114,7 +118,9 @@ public class TMGDO {
 						}
 					}
 				} else {
-					logger.warn("A HarvestDropsEvent was fired with no subject block");
+					if(warnNoSubjectBlock) {
+						logger.warn("A HarvestDropsEvent was fired with no subject block");
+					}
 				}
 			}
 		}
