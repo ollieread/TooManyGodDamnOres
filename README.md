@@ -8,11 +8,16 @@ that of the mod specified in the configuration.
 
     # Configuration file
 
-    ####################
-    # general
-    ####################
-
-    general {
+    exclusions {
+        S:oreCopper <
+            TConstruct:GravelOre
+        >
+        S:oreTin <
+            TConstruct:GravelOre
+        >
+    }	
+	
+    replacements {
         S:oreCopper=IC2
         S:oreTin=IC2
     }
