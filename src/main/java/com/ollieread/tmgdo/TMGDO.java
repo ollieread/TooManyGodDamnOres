@@ -1,5 +1,11 @@
 package com.ollieread.tmgdo;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +27,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -31,18 +38,33 @@ public class TMGDO {
 
 	public static ConfigCategory replacements;
 	public static ConfigCategory exclusions;
+	
+	public static ConfigCategory settings;
+	public static boolean dumpOreDictOnLoad = false;
+	public static Configuration config;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
 	{
-		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+		config = new Configuration(event.getSuggestedConfigurationFile());
 
 		config.load();
 
 		replacements = config.getCategory("replacements");
 		exclusions = config.getCategory("exclusions");
+				
+		settings = config.getCategory("settings");
+		
+		Property dumpOreDict = config.get("settings", "dumpOreDictOnLoad", false);
+		
+		if (dumpOreDict.getBoolean()) {
+			dumpOreDictOnLoad = true;
+			dumpOreDict.set(false);
+		}
 
 		config.save();
+		
+		
 	}
 
 	@EventHandler
@@ -124,7 +146,13 @@ public class TMGDO {
 		}
 	}
 
-
+	/**
+	 * 
+	 * Utility method to use the Block/Item registries to get the modid and name
+	 * 
+	 * @param item - Either an item or itemblock
+	 * @return ResourceLocation containing the modid and name
+	 */
 	public ResourceLocation getNameForObject(Item item) {		
 
 		if (item instanceof ItemBlock) {
@@ -134,6 +162,37 @@ public class TMGDO {
 		}		
 
 		return null;		
+	}
+	
+	@EventHandler
+	public void postinit(FMLPostInitializationEvent event)
+	{
+		if (dumpOreDictOnLoad) {
+			
+			ArrayList<String> lines = new ArrayList<String>();
+			String[] names = OreDictionary.getOreNames();
+			
+			for (String name : names) {
+				lines.add(name);
+				String tab = "  ";
+				
+				List<ItemStack> ores = OreDictionary.getOres(name);
+				
+				for (ItemStack ore : ores) {
+					ResourceLocation resLoc = getNameForObject(ore.getItem());
+					lines.add(tab + resLoc.getResourceDomain() + ":" + resLoc.getResourcePath() );
+				}
+				
+				lines.add("" + System.lineSeparator());
+			}
+						
+			Path out = Paths.get(config.getConfigFile().getParentFile().getParentFile() + File.separator + "TMGDO_OreDictDump.txt");
+			try {
+				Files.write(out, lines, Charset.defaultCharset());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }
