@@ -54,69 +54,69 @@ public class TMGDO {
 	@SubscribeEvent
 	public void harvestBlock(HarvestDropsEvent event)
 	{
-		if(replacements != null && replacements.size() > 0) {	
-			if (event.getDrops() != null && event.getDrops().size() > 0) {
-				for (ItemStack s : event.getDrops() ) {
-					if (s.getItem() instanceof ItemBlock) {
-						
-						ItemStack oreStack = s;
-						
-						if(oreStack.getItem() != null) {
-							int[] oreIDs = OreDictionary.getOreIDs(oreStack);
-							int oreID;
+		if(replacements != null && replacements.size() > 0) {
+			if (event.getState().getBlock() != null) {			
+				if (event.getDrops() != null && event.getDrops().size() > 0) {
+					for (ItemStack s : event.getDrops() ) {
+						if (s.getItem() instanceof ItemBlock) {
+							ItemStack oreStack = s;
+							if(oreStack.getItem() != null) {
+								int[] oreIDs = OreDictionary.getOreIDs(oreStack);
+								int oreID;
 
-							if(oreIDs.length > 0) {
-								for(int i = 0; i < oreIDs.length; i++) {
-									oreID = oreIDs[i];
+								if(oreIDs.length > 0) {
+									for(int i = 0; i < oreIDs.length; i++) {
+										oreID = oreIDs[i];
 
-									if(oreID > -1) {
-										String oreName = OreDictionary.getOreName(oreID);
+										if(oreID > -1) {
+											String oreName = OreDictionary.getOreName(oreID);
 
-										if(oreName != null && replacements.containsKey(oreName)) {
-											String replacementName = replacements.get(oreName).getString();
-											Property exclusionDirty = exclusions.get(oreName);
-											List<String> exclusionNames = null;
+											if(oreName != null && replacements.containsKey(oreName)) {
+												String replacementName = replacements.get(oreName).getString();
+												Property exclusionDirty = exclusions.get(oreName);
+												List<String> exclusionNames = null;
 
-											if(exclusionDirty != null) {
-												exclusionNames = Arrays.asList(exclusionDirty.getStringList());
-											} else {
-												exclusionNames = new ArrayList<String>();
-											}
-
-											ResourceLocation ore = getNameForObject(oreStack.getItem());
-
-											if(ore == null) {
-												return;
-											}
-											
-											if (ore.getResourceDomain().toLowerCase().equals(replacementName.toLowerCase())) {
-												return;
-											}
-
-											if(exclusionNames.contains(ore.getResourceDomain() + ":" + ore.getResourcePath())) {
-												return;
-											}
-
-											ItemStack replacementStack = null;
-
-											for(ItemStack i1 : OreDictionary.getOres(oreName)) {
-												ResourceLocation item = getNameForObject(i1.getItem());
-												if(item != null && !exclusionNames.contains(item.getResourceDomain() + ":" + item.getResourcePath()) && item.getResourceDomain().toLowerCase().equals(replacementName.toLowerCase())) {
-													replacementStack = i1.copy();
-													break;
+												if(exclusionDirty != null) {
+													exclusionNames = Arrays.asList(exclusionDirty.getStringList());
+												} else {
+													exclusionNames = new ArrayList<String>();
 												}
-											}
 
-											if(replacementStack != null) {	
-												event.getDrops().add(replacementStack);
-												event.getDrops().remove(s);
+												ResourceLocation ore = getNameForObject(oreStack.getItem());
+
+												if(ore == null) {
+													return;
+												}
+
+												if (ore.getResourceDomain().toLowerCase().equals(replacementName.toLowerCase())) {
+													return;
+												}
+
+												if(exclusionNames.contains(ore.getResourceDomain() + ":" + ore.getResourcePath())) {
+													return;
+												}
+
+												ItemStack replacementStack = null;
+
+												for(ItemStack i1 : OreDictionary.getOres(oreName)) {
+													ResourceLocation item = getNameForObject(i1.getItem());
+													if(item != null && !exclusionNames.contains(item.getResourceDomain() + ":" + item.getResourcePath()) && item.getResourceDomain().toLowerCase().equals(replacementName.toLowerCase())) {
+														replacementStack = i1.copy();
+														break;
+													}
+												}
+
+												if(replacementStack != null) {	
+													event.getDrops().add(replacementStack);
+													event.getDrops().remove(s);
+												}
 											}
 										}
 									}
 								}
+							} else {
+								logger.warn("A HarvestDropsEvent was fired with no subject block");
 							}
-						} else {
-							logger.warn("A HarvestDropsEvent was fired with no subject block");
 						}
 					}
 				}
